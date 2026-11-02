@@ -1,18 +1,28 @@
-import clipboard from "clipboardy";
 import {ethers} from 'ethers'
-import bip39, { mnemonicToSeed, mnemonicToSeedSync } from "bip39"
+import bip39, {mnemonicToSeedSync } from "bip39"
 import { createWalletFull, MoneroNetworkType } from "monero-ts"
 import encodeQR from 'qr'
 import { createKeyPairSignerFromPrivateKeyBytes } from "@solana/kit";
 import { networks, payments} from "bitcoinjs-lib";
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
-
+import {exec} from "child_process"
 
 function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+function copyMnemonicToClipboard(mnemonic:string) {  
+// Escape the mnemonic for shell safety  
+const escapedMnemonic = mnemonic.replace(/'/g, "'\\''");
+
+exec(`echo '${escapedMnemonic}' | clipboard`, (error, stdout, stderr) => {    
+    if (error) {      
+    console.error(`Error copying to clipboard: ${error.message}`);      
+    return;    
+}    
+console.log('Mnemonic copied to clipboard successfully!');  });
+}
 
 const BIP39sizeToBytes: Record<number, number> = {
     12: 128,
@@ -89,7 +99,8 @@ const configureXmrWallet = async () => {
 
         console.log("XMR wallet address:", primaryAddress)
 
-        clipboard.writeSync(mnemonic)
+
+        copyMnemonicToClipboard(mnemonic)
 
         console.log("Succcessfully stored mnemonic of XMR Wallet in clipboard !")
         
@@ -145,7 +156,7 @@ export const generateBIP39Wallet = async (coinType: 'btc' | 'sol' | 'eth', mnemo
         console.log(encodeQR(address,'term'))
 
         console.log(coinType.toUpperCase(), address)
-        clipboard.writeSync(generatedMnemonic)
+        copyMnemonicToClipboard(generatedMnemonic)
         console.log("Mnemonic successfully saved in clipboard !")
 
     } catch (err) {
