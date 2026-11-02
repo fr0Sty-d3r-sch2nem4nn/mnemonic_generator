@@ -21,6 +21,7 @@
   "dependencies": {
     "argparse": "^3.0.4",
     "bip39": "^3.1.2",
+    "clipboardy": "^5.3.2",
     "qr": "^0.7.2",
     "tsx": "^4.23.15"
   },

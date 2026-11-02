@@ -1,13 +1,12 @@
 import bip39 from "bip39"
 import { ArgumentParser } from 'argparse'
 import encodeQR from 'qr'
+import clipboard from "clipboardy";
 
 
 function sleep(time:number) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
-
-const clipboard = new Clipboard()
 
 const parser = new ArgumentParser({
     description: "A simple tool for generating the mnemonic written in typescript"
@@ -60,7 +59,7 @@ try {
     console.log("Mnemonic generated:")
     console.log(generatedMnemonic)
 
-    clipboard.writeText(generatedMnemonic)
+   await clipboard.write(generatedMnemonic)
     console.log("Mnemonic successfully saved in clipboard !")
 
 } catch (err) {
