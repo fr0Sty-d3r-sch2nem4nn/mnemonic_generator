@@ -7,6 +7,7 @@ function sleep(time:number) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+const clipboard = new Clipboard()
 
 const parser = new ArgumentParser({
     description: "A simple tool for generating the mnemonic written in typescript"
@@ -58,7 +59,10 @@ try {
     console.log(`${mnemonicInArray.length} words of mnemonic`)
     console.log("Mnemonic generated:")
     console.log(generatedMnemonic)
-    
+
+    clipboard.writeText(generatedMnemonic)
+    console.log("Mnemonic successfully saved in clipboard !")
+
 } catch (err) {
     console.log(err)
 }
