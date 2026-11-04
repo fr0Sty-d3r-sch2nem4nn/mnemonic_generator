@@ -7,9 +7,21 @@ import { networks, payments} from "bitcoinjs-lib";
 import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import {exec} from "child_process"
+import { writeFileSync } from 'fs';
 
 function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function writeDetailsInFile(coin:string, address:string, height?:number, mnemonic?:string){
+    const value = `Address:\n${address}${height ? `\nHeight:\n${height}` : ''}${mnemonic && `\nMnemonic:\n${mnemonic.split(" ").join("\n")}\nQR-Code:\n${encodeQR(mnemonic, 'ascii')}`}`;
+    const date = new Date()
+
+    const file_name =`${date.toLocaleTimeString()}-${date.toDateString()}-${coin}-${address}.txt`
+
+    writeFileSync(file_name, value);
+    
+    console.log(`Value saved to ${file_name}`)
 }
 
 function copyMnemonicToClipboard(mnemonic:string) {  
@@ -87,11 +99,13 @@ const configureXmrWallet = async () => {
     try {
         const moneroWallet = await createWalletFull({
             networkType: MoneroNetworkType.MAINNET,
-            seed: undefined
+            seed: undefined,
+            server:'https://xmr.marritt.ca:443'
         })
 
         const mnemonic = await moneroWallet.getSeed()
         const primaryAddress = await moneroWallet.getPrimaryAddress()
+        const height = await moneroWallet.getDaemonHeight()
 
         await moneroWallet.close()
 
@@ -99,12 +113,13 @@ const configureXmrWallet = async () => {
 
         console.log("XMR wallet address:", primaryAddress)
 
-
         copyMnemonicToClipboard(mnemonic)
 
         console.log("Succcessfully stored mnemonic of XMR Wallet in clipboard !")
-        
-        return 0
+
+        writeDetailsInFile('xmr', primaryAddress, height, mnemonic)
+
+        return 1
     } catch (err) {
         console.log("There was an error while generating XMR wallet:", err)
     }
@@ -158,6 +173,8 @@ export const generateBIP39Wallet = async (coinType: 'btc' | 'sol' | 'eth', mnemo
         console.log(coinType.toUpperCase(), address)
         copyMnemonicToClipboard(generatedMnemonic)
         console.log("Mnemonic successfully saved in clipboard !")
+
+        writeDetailsInFile(coinType, address, undefined, generatedMnemonic)
 
     } catch (err) {
         console.log(err)
